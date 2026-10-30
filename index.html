@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f4f0">
+  <meta name="description" content="ШАГ — превращаем большие задачи в понятные действия.">
+  <title>ШАГ — разберись, сделай, двигайся дальше</title>
+  <style>
+    :root {
+      --bg: #f5f4f0;
+      --surface: #fffefa;
+      --surface-soft: #f0efe9;
+      --text: #22251f;
+      --muted: #77796f;
+      --line: #e7e5dd;
+      --accent: #6b5ce7;
+      --accent-dark: #5143c7;
+      --accent-soft: #ece9ff;
+      --lime: #d9f27e;
+      --green: #31765a;
+      --shadow: 0 14px 40px rgba(37, 36, 27, .07);
+      --radius: 22px;
+      --sidebar-width: 248px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 25px 15px 18px;
+      display: flex;
+      flex-direction: column;
+      background: #fbfaf7;
+      border-right: 1px solid var(--line);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 11px;
+      margin-bottom: 29px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--accent);
+      border-radius: 13px;
+      font-size: 21px;
+      font-weight: 800;
+      box-shadow: 0 7px 16px rgba(107, 92, 231, .25);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: -.7px;
+    }
+
+    .brand-name span {
+      display: block;
+      margin-top: -4px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    .nav-label {
+      padding: 0 12px;
+      margin: 15px 0 8px;
+      color: #a0a095;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 4px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .nav-item {
+      width: 100%;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 12px;
+      color: #66685f;
+      background: transparent;
+      text-align: left;
+      transition: .18s ease;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: var(--surface-soft);
+    }
+
+    .nav-item.active {
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      font-weight: 750;
+    }
+
+    .nav-icon {
+      width: 22px;
+      font-size: 17px;
+      text-align: center;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 14px 12px 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sidebar-note {
+      padding: 15px;
+      margin-bottom: 13px;
+      background: #f0efe7;
+      border-radius: 16px;
+    }
+
+    .sidebar-note strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .sidebar-note p { margin: 0; }
+
+    .main {
+      min-width: 0;
+      padding: 25px clamp(18px, 4vw, 57px) 55px;
+    }
+
+    .topbar {
+      max-width: 1210px;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 0 auto 27px;
+    }
+
+    .breadcrumbs {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .today-pill {
+      padding: 8px 12px;
+      color: #54564d;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      background: var(--lime);
+      border-radius: 50%;
+      font-weight: 800;
+    }
+
+    .content {
+      max-width: 1210px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(25px, 5vw, 52px);
+      background: #dedaff;
+      border-radius: 30px;
+      isolation: isolate;
+    }
+
+    .hero::before,
+    .hero::after {
+      position: absolute;
+      z-index: -1;
+      content: "";
+      border-radius: 50%;
+    }
+
+    .hero::before {
+      width: 290px;
+      height: 290px;
+      top: -140px;
+      right: 11%;
+      background: rgba(255,255,255,.35);
+    }
+
+    .hero::after {
+      width: 190px;
+      height: 190px;
+      right: -35px;
+      bottom: -110px;
+      background: rgba(107,92,231,.16);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 720px;
+      margin: 13px 0 12px;
+      font-size: clamp(37px, 6vw, 65px);
+      line-height: .99;
+      letter-spacing: -.065em;
+    }
+
+    .hero p {
+      max-width: 550px;
+      margin: 0;
+      color: #5d5b76;
+      font-size: 16px;
+    }
+
+    .search-box {
+      max-width: 750px;
+      display: flex;
+      gap: 9px;
+      padding: 8px;
+      margin-top: 27px;
+      background: white;
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 17px;
+      box-shadow: 0 12px 30px rgba(55, 48, 121, .1);
+    }
+
+    .search-box input {
+      min-width: 0;
+      flex: 1;
+      padding: 10px 12px;
+      color: var(--text);
+      background: transparent;
+      border: 0;
+      outline: 0;
+    }
+
+    .search-box input::placeholder { color: #9b9aa3; }
+
+    .search-box button,
+    .button-primary {
+      padding: 12px 19px;
+      color: white;
+      background: var(--accent);
+      border: 0;
+      border-radius: 12px;
+      font-weight: 750;
+      transition: .18s ease;
+    }
+
+    .search-box button:hover,
+    .button-primary:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    .hero-hints {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .hint-button {
+      padding: 7px 11px;
+      color: #595776;
+      background: rgba(255,255,255,.52);
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .hint-button:hover { background: white; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 34px 0 16px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 23px;
+      letter-spacing: -.04em;
+    }
+
+    .section-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .text-button {
+      padding: 7px 0;
+      color: var(--accent-dark);
+      background: none;
+      border: 0;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .category-card {
+      min-height: 132px;
+      padding: 17px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      text-align: left;
+      transition: .2s ease;
+    }
+
+    .category-card:hover {
+      border-color: #c9c2ff;
+      box-shadow: var(--shadow);
+      transform: translateY(-3px);
+    }
+
+    .category-card .emoji { font-size: 23px; }
+
+    .category-card h3 {
+      margin: 12px 0 4px;
+      font-size: 15px;
+    }
+
+    .category-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1.35fr .9fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .panel {
+      padding: 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .panel h2, .panel h3 { margin-top: 0; }
+
+    .task-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px;
+      background: #faf9f5;
+      border: 1px solid #f0eee7;
+      border-radius: 13px;
+    }
+
+    .task-row input,
+    .route-task input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .task-row label { flex: 1; cursor: pointer; }
+
+    .task-row input:checked + label,
+    .route-task input:checked + span {
+      color: #92938a;
+      text-decoration: line-through;
+    }
+
+    .task-time {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .quote-card {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #e7f1d2;
+    }
+
+    .quote-card .quote-mark {
+      color: #78904b;
+      font-size: 37px;
+      line-height: 1;
+    }
+
+    .quote-card blockquote {
+      margin: 15px 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.04em;
+    }
+
+    .quote-card p {
+      margin: 0;
+      color: #687554;
+      font-size: 12px;
+    }
+
+    .route-panel {
+      padding: 23px;
+      margin-top: 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .route-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .route-top h2 {
+      margin: 7px 0 4px;
+      font-size: 25px;
+      letter-spacing: -.05em;
+    }
+
+    .route-top p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .route-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .button-secondary {
+      padding: 9px 12px;
+      color: #56574f;
+      background: #f4f3ee;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .button-secondary:hover { background: #ebe9e1; }
+
+    .progress-wrap { margin: 19px 0; }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      background: #eeede8;
+      border-radius: 99px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: inherit;
+      transition: width .2s ease;
+    }
+
+    .route-tasks {
+      display: grid;
+      gap: 8px;
+    }
+
+    .route-task {
+      display: flex;
+      align-items: start;
+      gap: 12px;
+      padding: 14px;
+      background: #faf9f6;
+      border: 1px solid #efeee8;
+      border-radius: 14px;
+    }
+
+    .route-task span { flex: 1; }
+
+    .route-task strong {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+
+    .route-task small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .route-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .meta-chip {
+      padding: 7px 10px;
+      color: #64655d;
+      background: #f1f0ea;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    .page-intro {
+      padding: 27px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+    }
+
+    .page-intro h1 {
+      margin: 8px 0;
+      font-size: clamp(34px, 5vw, 50px);
+      line-height: 1;
+      letter-spacing: -.06em;
+    }
+
+    .page-intro p {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .guide-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 190px;
+      padding: 19px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    .guide-card .guide-icon { font-size: 23px; }
+
+    .guide-card h3 {
+      margin: 12px 0 6px;
+      font-size: 16px;
+    }
+
+    .guide-card p {
+      flex: 1;
+      margin: 0 0 15px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .guide-card button {
+      align-self: start;
+      padding: 0;
+      color: var(--accent-dark);
+      background: none;
+      border: 0;
+      font-weight: 750;
+      font-size: 12px;
+    }
+
+    .info-banner {
+      padding: 17px 19px;
+      margin-top: 17px;
+      color: #56584f;
+      background: #eff3e4;
+      border-radius: 15px;
+      font-size: 13px;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+      align-items: end;
+      gap: 11px;
+      padding: 19px;
+      margin-top: 17px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--text);
+      background: #faf9f6;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(107,92,231,.1);
+    }
+
+    .calculator-result {
+      grid-column: 1 / -1;
+      padding: 12px;
+      color: var(--green);
+      background: #edf5e6;
+      border-radius: 11px;
+      font-weight: 750;
+    }
+
+    .saved-list { display: grid; gap: 11px; }
+
+    .saved-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+
+    .saved-item h3 { margin: 0 0 4px; font-size: 15px; }
+    .saved-item p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .empty-state {
+      padding: 35px 20px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px dashed #d7d5cc;
+      border-radius: 18px;
+      text-align: center;
+    }
+
+    .empty-state .emoji { display: block; margin-bottom: 8px; font-size: 32px; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(28, 28, 34, .48);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(100%, 540px);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+      background: var(--surface);
+      border-radius: 22px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.2);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-head h2 { margin: 0; letter-spacing: -.04em; }
+
+    .close-button {
+      width: 34px;
+      height: 34px;
+      color: var(--muted);
+      background: #f0efe9;
+      border: 0;
+      border-radius: 50%;
+      font-size: 19px;
+    }
+
+    .modal-form { display: grid; gap: 13px; }
+
+    .modal-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 60;
+      max-width: min(370px, calc(100vw - 44px));
+      padding: 13px 17px;
+      color: white;
+      background: #282a25;
+      border-radius: 13px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: .2s ease;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-menu-button {
+      display: none;
+      width: 38px;
+      height: 38px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+
+    .footer-note {
+      padding: 22px 5px 0;
+      color: #98998f;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    @media (max-width: 1050px) {
+      :root { --sidebar-width: 215px; }
+      .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .app { display: block; }
+      .sidebar {
+        position: fixed;
+        left: -270px;
+        width: 250px;
+        transition: left .22s ease;
+        box-shadow: var(--shadow);
+      }
+      .sidebar.open { left: 0; }
+      .main { padding: 16px 15px 35px; }
+      .topbar { margin-bottom: 17px; }
+      .mobile-menu-button { display: inline-grid; place-items: center; }
+      .topbar-left { display: flex; align-items: center; gap: 10px; }
+      .breadcrumbs { font-size: 12px; }
+      .today-pill { display: none; }
+      .hero { border-radius: 23px; }
+      .hero p { font-size: 14px; }
+      .search-box { flex-direction: column; }
+      .search-box button { width: 100%; }
+      .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-column { grid-template-columns: 1fr; }
+      .guide-grid { grid-template-columns: 1fr; }
+      .calculator { grid-template-columns: 1fr; }
+      .calculator-result { grid-column: auto; }
+      .route-top { flex-direction: column; }
+      .section-head { align-items: start; }
+    }
+
+    @media (max-width: 420px) {
+      .category-grid { gap: 9px; }
+      .category-card { min-height: 122px; padding: 13px; }
+      .category-card h3 { font-size: 14px; }
+      .hero h1 { font-size: 42px; }
+      .panel, .route-panel { padding: 17px; }
+      .top-actions { gap: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-page="home" aria-label="ШАГ — на главную">
+        <div class="brand-mark">↗️</div>
+        <div class="brand-name">ШАГ<span>ТВОЙ ПЛАН ДЕЙСТВИЙ</span></div>
+      </a>
+
+      <div class="nav-label">Пространство</div>
+      <nav class="nav-list" id="mainNav" aria-label="Основная навигация"></nav>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-note">
+          <strong>Маленький шаг — тоже шаг ✨</strong>
+          <p>Не нужно делать всё сразу. Начни с одного действия.</p>
+        </div>
+        <div>Твои данные остаются в этом браузере.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-button" id="menuToggle" aria-label="Открыть меню">☰</button>
+          <div class="breadcrumbs" id="breadcrumbs">Главная / Сегодня</div>
+        </div>
+        <div class="top-actions">
+          <div class="today-pill" id="datePill"></div>
+          <div class="avatar" title="Твой личный кабинет">Ш</div>
+        </div>
+      </header>
+
+      <div class="content" id="view"></div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="presentation">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">Создать инструкцию</h2>
+        <button class="close-button" type="button" data-action="close-modal" aria-label="Закрыть">×</button>
+      </div>
+      <form class="modal-form" id="guideForm">
+        <div class="field">
+          <label for="guideTitle">Название инструкции</label>
+          <input id="guideTitle" name="title" required maxlength="100" placeholder="Например: Как подготовиться к переезду">
+        </div>
+        <div class="field">
+          <label for="guideCategory">Раздел</label>
+          <select id="guideCategory" name="category">
+            <option>Учёба</option>
+            <option>Работа</option>
+            <option>Деньги</option>
+            <option>Дом</option>
+            <option>Здоровье</option>
+            <option>Документы</option>
+            <option>Отношения</option>
+            <option>Другое</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="guideDescription">Короткое описание и шаги</label>
+          <textarea id="guideDescription" name="description" required maxlength="1200" placeholder="Опиши, кому поможет инструкция и с чего начать."></textarea>
+        </div>
+        <button class="button-primary" type="submit">Сохранить черновик</button>
+        <small style="color:var(--muted)">Черновик сохранится только в этом браузере. Перед публикацией советы важно проверить.</small>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    const NAV = [
+      { id: "home", label: "Сегодня", icon: "☀️", group: "main" },
+      { id: "study", label: "Учёба", icon: "📚", group: "main" },
+      { id: "work", label: "Работа", icon: "💼", group: "main" },
+      { id: "money", label: "Деньги", icon: "💸", group: "main" },
+      { id: "home-life", label: "Дом и быт", icon: "🏡", group: "main" },
+      { id: "health", label: "Здоровье", icon: "🌿", group: "main" },
+      { id: "documents", label: "Документы", icon: "🗂️", group: "main" },
+      { id: "relationships", label: "Общение", icon: "💬", group: "main" },
+      { id: "city", label: "Мой город", icon: "📍", group: "explore" },
+      { id: "community", label: "Помощь рядом", icon: "🤝", group: "explore" },
+      { id: "routes", label: "Мои маршруты", icon: "🧭", group: "personal" },
+      { id: "create", label: "Создать инструкцию", icon: "✍️", group: "personal" }
+    ];
+
+    const CATEGORIES = {
+      study: {
+        title: "Учёба", icon: "📚",
+        description: "Разбирайся в сложных темах, учись в своём темпе и отмечай прогресс.",
+        cards: [
+          ["🎯", "Составить план подготовки", "Разбей большую цель на короткие учебные сессии.", "Подготовиться к экзамену"],
+          ["🧠", "Учиться эффективнее", "Попробуй интервальные повторения и короткие перерывы.", "Научиться учиться"],
+          ["🌍", "Изучать язык", "Создай ежедневную практику из простых заданий.", "Начать учить английский"],
+          ["📝", "Подготовить доклад", "От выбора темы до финальной репетиции.", "Подготовить доклад"]
+        ],
+        notice: "Полезный принцип: лучше заниматься понемногу регулярно, чем пытаться выучить всё за один вечер."
+      },
+      work: {
+        title: "Работа", icon: "💼",
+        description: "Ищи работу, готовься к собеседованиям и развивай навыки без лишней паники.",
+        cards: [
+          ["📄", "Собрать резюме", "Покажи опыт и навыки ясно и по делу.", "Составить резюме"],
+          ["🔎", "Найти первую работу", "Сформулируй цель, подготовь отклики и начни поиск.", "Найти первую работу"],
+          ["🎤", "Подготовиться к интервью", "Продумай примеры, вопросы и спокойный план.", "Подготовиться к собеседованию"],
+          ["🛠️", "Прокачать навык", "Выбери один навык и практикуй его небольшими шагами.", "Развить новый навык"]
+        ],
+        notice: "Не отправляй незнакомым людям сканы документов и банковские данные до проверки работодателя."
+      },
+      money: {
+        title: "Деньги", icon: "💸",
+        description: "Понятные привычки для бюджета, расходов и накоплений — без обещаний быстрого заработка.",
+        cards: [
+          ["📊", "Составить бюджет", "Посмотри, сколько приходит и куда уходят деньги.", "Составить личный бюджет"],
+          ["🐣", "Начать копить", "Определи небольшую цель и удобный регулярный взнос.", "Начать копить"],
+          ["🧾", "Разобраться с расходами", "Раздели траты на обязательные и гибкие.", "Контролировать расходы"]
+        ],
+        notice: "Калькулятор ниже — для планирования. Это не финансовая рекомендация и не гарантия результата."
+      },
+      "home-life": {
+        title: "Дом и быт", icon: "🏡",
+        description: "Готовка, уборка, переезд и домашние дела — по силам, без идеальности.",
+        cards: [
+          ["🍲", "Научиться готовить", "Собери несколько простых блюд и список продуктов.", "Научиться готовить простые ужины"],
+          ["📦", "Подготовиться к переезду", "Спланируй жильё, документы, вещи и расходы.", "Подготовиться к переезду"],
+          ["🧺", "Навести порядок", "Выбери одну небольшую зону и начни с неё.", "Навести порядок дома"],
+          ["🪴", "Организовать пространство", "Подумай, что должно быть удобнее именно тебе.", "Организовать домашнее пространство"]
+        ],
+        notice: "Начни с 10 минут. Маленькая завершённая задача часто полезнее большого идеального плана."
+      },
+      health: {
+        title: "Здоровье", icon: "🌿",
+        description: "Общие полезные материалы и привычки. Сайт не ставит диагнозы и не заменяет врача.",
+        cards: [
+          ["🩺", "Подготовиться к визиту к врачу", "Запиши симптомы, вопросы и лекарства, которые принимаешь.", "Подготовиться к визиту к врачу"],
+          ["💧", "Заботиться о привычках", "Выбери одну реалистичную привычку на ближайшую неделю.", "Создать полезную привычку"],
+          ["🫶", "Поддержать себя в стрессе", "Попробуй простые способы снизить напряжение.", "Справиться со стрессом"]
+        ],
+        notice: "Если состояние срочное или опасное — обратись в местную службу экстренной помощи или к медицинскому специалисту."
+      },
+      documents: {
+        title: "Документы", icon: "🗂️",
+        description: "Разбирайся, что подготовить и где проверить официальные требования для своей страны.",
+        cards: [
+          ["🪪", "Подготовить документы", "Составь список бумаг и проверь требования в официальных источниках.", "Разобраться с документами"],
+          ["🏠", "Оформить переезд", "Уточни местные правила регистрации и сроки.", "Подготовить документы для переезда"],
+          ["📅", "Не пропустить срок", "Собери важные даты и поставь напоминания.", "Организовать важные документы"]
+        ],
+        notice: "Правила зависят от страны и могут меняться. Всегда перепроверяй информацию на официальном сайте ведомства."
+      },
+      relationships: {
+        title: "Общение", icon: "💬",
+        description: "Готовься к непростым разговорам, учись бережно обозначать границы и слушать.",
+        cards: [
+          ["🗣️", "Подготовиться к разговору", "Сформулируй, что ты чувствуешь и о чём хочешь попросить.", "Подготовиться к важному разговору"],
+          ["🧭", "Обозначить границы", "Подумай, что для тебя приемлемо и как сказать об этом спокойно.", "Научиться обозначать личные границы"],
+          ["🤝", "Разрешить конфликт", "Отдели факты от предположений и попробуй услышать другую сторону.", "Разобраться с конфликтом"]
+        ],
+        notice: "Если ты не чувствуешь себя в безопасности, обратись к человеку, которому доверяешь, или в местную службу поддержки."
+      },
+      city: {
+        title: "Мой город", icon: "📍",
+        description: "Находи полезные места, возможности и события рядом с собой.",
+        cards: [
+          ["📖", "Найти библиотеку", "Проверь сайт муниципалитета или местные каталоги библиотек.", "Найти библиотеку рядом"],
+          ["🎨", "Найти бесплатное занятие", "Посмотри афиши культурных центров, библиотек и сообществ.", "Найти бесплатные занятия"],
+          ["🚌", "Разобраться с транспортом", "Сохрани официальное приложение или сайт перевозчика.", "Разобраться с транспортом в городе"]
+        ],
+        notice: "Справочник пока не подключён к картам. Уточняй адреса, расписания и доступность у организаторов."
+      },
+      community: {
+        title: "Помощь рядом", icon: "🤝",
+        description: "Проси о поддержке, делись опытом и находи способы помочь другим.",
+        cards: [
+          ["🙋", "Попросить о помощи", "Сформулируй конкретно, какая поддержка тебе нужна.", "Попросить о помощи"],
+          ["🧤", "Найти волонтёрство", "Проверь организации и волонтёрские центры в своём городе.", "Найти волонтёрскую возможность"],
+          ["💡", "Поделиться опытом", "Опиши, что помогло тебе, и укажи важные ограничения.", "Поделиться полезным советом"]
+        ],
+        notice: "Не публикуй адрес, документы, пароли и финансовые данные. Встречайся с незнакомыми людьми только в безопасных условиях."
+      }
+    };
+
+    const DEFAULT_TASKS = [
+      ["Определи, какой результат тебе нужен", "Сформулируй цель одним предложением."],
+      ["Раздели цель на небольшие действия", "Начни с шага, который можно выполнить за 10–20 минут."],
+      ["Подготовь нужные ресурсы", "Собери информацию, документы или инструменты."],
+      ["Сделай первый шаг", "Не жди идеального момента — начни с доступного."],
+      ["Проверь результат и выбери продолжение", "Отметь, что получилось, и скорректируй план."]
+    ];
+
+    const ROUTE_TEMPLATES = [
+      {
+        match: ["работ", "резюме", "ваканс", "собесед", "карьер"],
+        tasks: [
+          ["Определи подходящие роли", "Запиши, какие задачи и условия тебе подходят."],
+          ["Собери опыт и навыки", "Добавь учёбу, проекты, волонтёрство и практику."],
+          ["Подготовь резюме", "Сделай короткую версию под выбранную роль."],
+          ["Найди надёжные вакансии", "Проверяй компанию и не плати за трудоустройство."],
+          ["Подготовься к собеседованию", "Продумай примеры и вопросы работодателю."]
+        ],
+        time: "2–4 недели", category: "Работа"
+      },
+      {
+        match: ["бюджет", "деньг", "коп", "расход", "финанс"],
+        tasks: [
+          ["Запиши доходы за месяц", "Учитывай только реальные и регулярные поступления."],
+          ["Собери основные расходы", "Отметь жильё, еду, транспорт и обязательные платежи."],
+          ["Найди гибкие расходы", "Посмотри, что можно изменить без вреда для себя."],
+          ["Выбери небольшую финансовую цель", "Например, резерв на конкретную нужду."],
+          ["Проверь план через неделю", "Сравни план с реальностью и скорректируй его."]
+        ],
+        time: "около 1 недели", category: "Деньги"
+      },
+      {
+        match: ["переезд", "переехать", "квартир"],
+        tasks: [
+          ["Определи даты и бюджет", "Добавь к расчёту перевозку и непредвиденные расходы."],
+          ["Проверь жильё и условия", "Уточни договор, оплату и важные бытовые детали."],
+          ["Собери документы", "Проверь актуальные требования для своего региона."],
+          ["Разбери и упакуй вещи", "Подпиши коробки и отдельно собери самое нужное."],
+          ["Организуй первые дни", "Продумай транспорт, связь, еду и необходимые услуги."]
+        ],
+        time: "2–6 недель", category: "Дом и быт"
+      },
+      {
+        match: ["готов", "ужин", "рецепт"],
+        tasks: [
+          ["Выбери три простых блюда", "Начни с рецептов с небольшим числом ингредиентов."],
+          ["Проверь продукты дома", "Отметь, что уже есть и что нужно купить."],
+          ["Составь список покупок", "Покупай только то, что подходит выбранным блюдам."],
+          ["Приготовь первое блюдо", "Следуй шагам и не переживай из-за мелких ошибок."],
+          ["Сохрани удачный рецепт", "Запиши, что хочешь изменить в следующий раз."]
+        ],
+        time: "3–5 дней", category: "Дом и быт"
+      },
+      {
+        match: ["экзам", "учить", "учёб", "учеб", "язык", "подготов"],
+        tasks: [
+          ["Определи цель и дату", "Запиши, что именно нужно освоить и к какому сроку."],
+          ["Разбей материал на темы", "Отметь знакомое и то, что требует внимания."],
+          ["Составь короткое расписание", "Планируй реалистичные занятия и перерывы."],
+          ["Проверь знания на практике", "Реши задания или объясни тему своими словами."],
+          ["Повтори сложные места", "Вернись к ним через день и ещё раз через несколько дней."]
+        ],
+        time: "по твоему расписанию", category: "Учёба"
+      },
+      {
+        match: ["врач", "здоров", "стресс", "привыч"],
+        tasks: [
+          ["Сформулируй, что тебя беспокоит", "Запиши наблюдения и вопросы."],
+          ["Найди подходящего специалиста", "Проверь квалификацию и доступность помощи."],
+          ["Подготовь важную информацию", "Возьми список лекарств и медицинских данных, если это уместно."],
+          ["Обсуди вопросы со специалистом", "Не стесняйся попросить объяснить непонятное."],
+          ["Запиши дальнейшие рекомендации", "Уточни, когда и куда обратиться повторно."]
+        ],
+        time: "зависит от ситуации", category: "Здоровье"
+      }
+    ];
+
+    const STORAGE_KEYS = {
+      tasks: "shag_daily_tasks_v1",
+      route: "shag_active_route_v1",
+      routes: "shag_saved_routes_v1",
+      drafts: "shag_guide_drafts_v1"
+    };
+
+    function readStorage(key, fallback) {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function writeStorage(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (error) {
+        showToast("Не удалось сохранить данные в браузере.");
+      }
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, function (char) {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        };
+        return map[char];
+      });
+    }
+
+    let currentPage = "home";
+    let activeRoute = readStorage(STORAGE_KEYS.route, null);
+    let toastTimer = null;
+
+    const view = document.getElementById("view");
+    const mainNav = document.getElementById("mainNav");
+    const sidebar = document.getElementById("sidebar");
+
+    function renderNav() {
+      const groups = [
+        { id: "main", label: "Основное" },
+        { id: "explore", label: "Рядом и вместе" },
+        { id: "personal", label: "Личное" }
+      ];
+
+      mainNav.innerHTML = groups.map(function (group) {
+        const items = NAV.filter(function (item) { return item.group === group.id; });
+        return '<div class="nav-label">' + group.label + '</div>' +
+          items.map(function (item) {
+            return '<button class="nav-item ' + (currentPage === item.id ? "active" : "") +
+              '" type="button" data-page="' + item.id + '">' +
+              '<span class="nav-icon">' + item.icon + '</span><span>' + item.label + '</span></button>';
+          }).join("");
+      }).join("");
+    }
+
+    function updateHeader() {
+      const item = NAV.find(function (entry) { return entry.id === currentPage; });
+      document.getElementById("breadcrumbs").textContent =
+        "ШАГ / " + (item ? item.label : "Главная");
+      document.getElementById("datePill").textContent =
+        new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" })
+          .format(new Date());
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        toast.classList.remove("show");
+      }, 2800);
+    }
+
+    function makeHome() {
+      const dailyTasks = [
+        ["Сделать один важный звонок", "10 минут"],
+        ["Выйти на короткую прогулку", "15 минут"],
+        ["Записать одну мысль или идею", "5 минут"]
+      ];
+      const completed = readStorage(STORAGE_KEYS.tasks, []);
+
+      return `
+        <section class="hero">
+          <div class="eyebrow">✦ ТВОЙ ПРОСТРАНСТВО ДЛЯ ДЕЙСТВИЙ</div>
+          <h1>Большие цели.<br>Понятные шаги.</h1>
+          <p>Расскажи, что хочешь сделать. Мы поможем превратить это в спокойный и понятный план.</p>
+          <form class="search-box" id="routeForm">
+            <input id="routeInput" type="text" maxlength="180" required
+              placeholder="Например: хочу найти первую работу">
+            <button type="submit">Составить план <span aria-hidden="true">↗️</span></button>
+          </form>
+          <div class="hero-hints">
+            <button class="hint-button" type="button" data-query="Хочу найти первую работу">Найти работу</button>
+            <button class="hint-button" type="button" data-query="Хочу составить бюджет">Составить бюджет</button>
+            <button class="hint-button" type="button" data-query="Хочу подготовиться к переезду">Подготовиться к переезду</button>
+            <button class="hint-button" type="button" data-query="Хочу научиться готовить">Научиться готовить</button>
+          </div>
+        </section>
+
+        <div id="routeSlot">${activeRoute ? renderRouteHTML(activeRoute) : ""}</div>
+
+        <div class="section-head">
+          <div><h2>Выбери направление</h2><p>Здесь есть идеи для разных жизненных задач.</p></div>
+          <button class="text-button" type="button" data-page="routes">Мои маршруты →</button>
+        </div>
+        <section class="category-grid">
+          ${[
+            ["📚", "Учёба", "Понимать новое", "study"],
+            ["💼", "Работа", "Находить возможности", "work"],
+            ["💸", "Деньги", "Планировать спокойно", "money"],
+            ["🏡", "Дом и быт", "Упрощать повседневное", "home-life"],
+            ["🌿", "Здоровье", "Заботиться о себе", "health"],
+            ["🗂️", "Документы", "Разбираться в правилах", "documents"],
+            ["💬", "Общение", "Говорить бережно", "relationships"],
+            ["📍", "Мой город", "Искать возможности рядом", "city"]
+          ].map(function (item) {
+            return `<button class="category-card" type="button" data-page="${item[3]}">
+              <span class="emoji">${item[0]}</span><h3>${item[1]}</h3><p>${item[2]}</p>
+            </button>`;
+          }).join("")}
+        </section>
+
+        <section class="two-column">
+          <div class="panel">
+            <div class="section-head" style="margin:0 0 14px">
+              <div><h2>Небольшой план на сегодня</h2><p>Выбери то, что подходит именно тебе.</p></div>
+            </div>
+            <div class="task-list">
+              ${dailyTasks.map(function (task, index) {
+                const checked = completed.includes(index);
+                return `<div class="task-row">
+                  <input type="checkbox" id="daily-${index}" data-daily="${index}" ${checked ? "checked" : ""}>
+                  <label for="daily-${index}">${task[0]}</label>
+                  <span class="task-time">${task[1]}</span>
+                </div>`;
+              }).join("")}
+            </div>
+          </div>
+          <div class="panel quote-card">
+            <div><div class="quote-mark">“</div><blockquote>Тебе не нужно видеть всю лестницу. Достаточно сделать следующий шаг.</blockquote></div>
+            <p>Идея дня · бережное движение вперёд</p>
+          </div>
+        </section>
+        <div class="footer-note">ШАГ помогает организовать информацию и планы. Важные медицинские, юридические и финансовые решения проверяй у профильных специалистов.</div>
+      `;
+    }
+
+    function chooseTemplate(query) {
+      const normalized = query.toLowerCase();
+      return ROUTE_TEMPLATES.find(function (template) {
+        return template.match.some(function (word) { return normalized.includes(word); });
+      }) || { tasks: DEFAULT_TASKS, time: "по твоему темпу", category: "Личный план" };
+    }
+
+    function createRoute(query) {
+      const cleanQuery = query.trim();
+      if (!cleanQuery) {
+        showToast("Напиши, что хочешь сделать.");
+        return;
+      }
+      const template = chooseTemplate(cleanQuery);
+      activeRoute = {
+        id: "route-" + Date.now(),
+        title: cleanQuery.charAt(0).toUpperCase() + cleanQuery.slice(1),
+        category: template.category,
+        time: template.time,
+        tasks: template.tasks.map(function (task, index) {
+          return { id: index, title: task[0], description: task[1], done: false };
+        }),
+        createdAt: new Date().toISOString()
+      };
+      writeStorage(STORAGE_KEYS.route, activeRoute);
+      currentPage = "home";
+      render();
+      setTimeout(function () {
+        const route = document.getElementById("routePanel");
+        if (route) route.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+      showToast("Готово — твой маршрут создан.");
+    }
+
+    function renderRouteHTML(route) {
+      if (!route || !Array.isArray(route.tasks)) return "";
+      const doneCount = route.tasks.filter(function (task) { return task.done; }).length;
+      const percent = route.tasks.length ? Math.round(doneCount / route.tasks.length * 100) : 0;
+
+      return `<section class="route-panel" id="routePanel">
+        <div class="route-top">
+          <div>
+            <div class="eyebrow">ТВОЙ МАРШРУТ · ${escapeHTML(route.category || "Личный план")}</div>
+            <h2>${escapeHTML(route.title)}</h2>
+            <p>Двигайся в своём темпе — можно отмечать шаги по мере выполнения.</p>
+          </div>
+          <div class="route-actions">
+            <button class="button-secondary" type="button" data-action="share-route">↗️ Поделиться</button>
+            <button class="button-secondary" type="button" data-action="save-route">♡ Сохранить</button>
+            <button class="button-secondary" type="button" data-action="clear-route">× Закрыть</button>
+          </div>
+        </div>
+        <div class="route-meta">
+          <span class="meta-chip">⏱️ ${escapeHTML(route.time || "в своём темпе")}</span>
+          <span class="meta-chip">☑️ ${route.tasks.length} шагов</span>
+          <span class="meta-chip">🌱 Можно менять план</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Твой прогресс</span><span>${doneCount} из ${route.tasks.length} · ${percent}%</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>
+        </div>
+        <div class="route-tasks">
+          ${route.tasks.map(function (task, index) {
+            return `<label class="route-task">
+              <input type="checkbox" data-route-task="${index}" ${task.done ? "checked" : ""}>
+              <span><strong>${escapeHTML(task.title)}</strong><small>${escapeHTML(task.description)}</small></span>
+            </label>`;
+          }).join("")}
+        </div>
+        <div class="info-banner">💡 Это стартовый план, а не единственно правильный путь. Адаптируй шаги под свою ситуацию.</div>
+      </section>`;
+    }
+
+    function makeCategoryPage(id) {
+      const category = CATEGORIES[id];
+      if (!category) return makeNotFound();
+
+      return `<section class="page-intro">
+        <div class="eyebrow">${category.icon} · РАЗДЕЛ ШАГА</div>
+        <h1>${category.title}</h1>
+        <p>${category.description}</p>
+      </section>
+      <div class="section-head">
+        <div><h2>Популярные маршруты</h2><p>Выбери идею — и получи план действий.</p></div>
+      </div>
+      <section class="guide-grid">
+        ${category.cards.map(function (card) {
+          return `<article class="guide-card">
+            <div class="guide-icon">${card[0]}</div>
+            <h3>${escapeHTML(card[1])}</h3>
+            <p>${escapeHTML(card[2])}</p>
+            <button type="button" data-query="${escapeHTML(card[3])}">Составить маршрут →</button>
+          </article>`;
+        }).join("")}
+      </section>
+      ${id === "money" ? makeBudgetCalculator() : ""}
+      <div class="info-banner">${escapeHTML(category.notice)}</div>`;
+    }
+
+    function makeBudgetCalculator() {
+      return `<div class="section-head"><div><h2>Калькулятор простого бюджета</h2><p>Прикинь, сколько остаётся после основных расходов.</p></div></div>
+        <form class="calculator" id="budgetForm">
+          <div class="field"><label for="income">Доход за месяц</label><input id="income" type="number" min="0" step="0.01" placeholder="Например, 80000" required></div>
+          <div class="field"><label for="expenses">Основные расходы</label><input id="expenses" type="number" min="0" step="0.01" placeholder="Например, 55000" required></div>
+          <div class="field"><label for="currency">Валюта</label><select id="currency"><option value="₽">₽ — рубль</option><option value="€">€ — евро</option><option value="$">$ — доллар</option><option value="">Другая</option></select></div>
+          <button class="button-primary" type="submit">Посчитать</button>
+          <div class="calculator-result" id="budgetResult" hidden></div>
+        </form>`;
+    }
+
+    function makeRoutesPage() {
+      const routes = readStorage(STORAGE_KEYS.routes, []);
+      if (!routes.length) {
+        return `<section class="page-intro"><div class="eyebrow">🧭 ЛИЧНОЕ ПРОСТРАНСТВО</div><h1>Мои маршруты</h1><p>Сохраняй планы, чтобы возвращаться к ним в удобное время.</p></section>
+        <div class="empty-state" style="margin-top:17px"><span class="emoji">🪴</span><strong>Пока здесь пусто</strong><p>Создай маршрут на главной и нажми «Сохранить».</p><button class="button-primary" type="button" data-page="home">Создать маршрут</button></div>`;
+      }
+
+      return `<section class="page-intro"><div class="eyebrow">🧭 ЛИЧНОЕ ПРОСТРАНСТВО</div><h1>Мои маршруты</h1><p>Все сохранённые планы собраны здесь. Они хранятся только в этом браузере.</p></section>
+        <div class="saved-list" style="margin-top:17px">
+          ${routes.map(function (route, index) {
+            const done = route.tasks.filter(function (task) { return task.done; }).length;
+            return `<article class="saved-item">
+              <div><h3>${escapeHTML(route.title)}</h3><p>${escapeHTML(route.category || "Личный план")} · ${done} из ${route.tasks.length} шагов</p></div>
+              <div class="route-actions">
+                <button class="button-secondary" type="button" data-open-saved="${index}">Открыть</button>
+                <button class="button-secondary" type="button" data-delete-saved="${index}" aria-label="Удалить маршрут">Удалить</button>
+              </div>
+            </article>`;
+          }).join("")}
+        </div>`;
+    }
+
+    function makeCreatePage() {
+      const drafts = readStorage(STORAGE_KEYS.drafts, []);
+      return `<section class="page-intro"><div class="eyebrow">✍️ ДЕЛИСЬ ОПЫТОМ</div><h1>Создать инструкцию</h1><p>Сохрани полезную идею для себя или подготовь черновик, которым можно поделиться позже.</p></section>
+        <div class="panel" style="margin-top:17px">
+          <h2>Пиши просто и бережно</h2>
+          <p style="color:var(--muted)">Хорошая инструкция объясняет, кому она подходит, что понадобится и с чего начать. Для важных советов добавляй проверяемые официальные источники.</p>
+          <button class="button-primary" type="button" data-action="open-modal">＋ Написать инструкцию</button>
+        </div>
+        ${drafts.length ? `<div class="section-head"><div><h2>Твои черновики</h2><p>Они сохранены на этом устройстве.</p></div></div>
+          <div class="guide-grid">${drafts.map(function (draft) {
+            return `<article class="guide-card"><div class="guide-icon">📝</div><h3>${escapeHTML(draft.title)}</h3><p>${escapeHTML(draft.description)}</p><span class="meta-chip">${escapeHTML(draft.category)} · черновик</span></article>`;
+          }).join("")}</div>` : ""}`;
+    }
+
+    function makeNotFound() {
+      return `<div class="empty-state"><span class="emoji">🌱</span><strong>Раздел не найден</strong><p>Вернись на главную и выбери другое направление.</p><button class="button-primary" type="button" data-page="home">На главную</button></div>`;
+    }
+
+    function render() {
+      renderNav();
+      updateHeader();
+
+      if (currentPage === "home") view.innerHTML = makeHome();
+      else if (CATEGORIES[currentPage]) view.innerHTML = makeCategoryPage(currentPage);
+      else if (currentPage === "routes") view.innerHTML = makeRoutesPage();
+      else if (currentPage === "create") view.innerHTML = makeCreatePage();
+      else view.innerHTML = makeNotFound();
+
+      sidebar.classList.remove("open");
+    }
+
+    function saveActiveRoute() {
+      if (!activeRoute) return;
+      const routes = readStorage(STORAGE_KEYS.routes, []);
+      const existingIndex = routes.findIndex(function (route) { return route.id === activeRoute.id; });
+      if (existingIndex >= 0) routes[existingIndex] = activeRoute;
+      else routes.unshift(activeRoute);
+      writeStorage(STORAGE_KEYS.routes, routes);
+      showToast("Маршрут сохранён в разделе «Мои маршруты».");
+    }
+
+    function openModal() {
+      document.getElementById("modalBackdrop").classList.add("open");
+      document.getElementById("guideTitle").focus();
+    }
+
+    function closeModal() {
+      document.getElementById("modalBackdrop").classList.remove("open");
+    }
+
+    document.addEventListener("click", function (event) {
+      const pageTarget = event.target.closest("[data-page]");
+      if (pageTarget) {
+        event.preventDefault();
+        currentPage = pageTarget.dataset.page;
+        render();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      const queryTarget = event.target.closest("[data-query]");
+      if (queryTarget) {
+        createRoute(queryTarget.dataset.query || "");
+        return;
+      }
+
+      const actionTarget = event.target.closest("[data-action]");
+      if (actionTarget) {
+        const action = actionTarget.dataset.action;
+        if (action === "open-modal") openModal();
+        if (action === "close-modal") closeModal();
+        if (action === "save-route") saveActiveRoute();
+        if (action === "clear-route") {
+          activeRoute = null;
+          writeStorage(STORAGE_KEYS.route, null);
+          render();
+          showToast("Маршрут закрыт. Сохранённые маршруты не удалены.");
+        }
+        if (action === "share-route") shareRoute();
+        return;
+      }
+
+      const openSaved = event.target.closest("[data-open-saved]");
+      if (openSaved) {
+        const routes = readStorage(STORAGE_KEYS.routes, []);
+        const selected = routes[Number(openSaved.dataset.openSaved)];
+        if (selected) {
+          activeRoute = selected;
+          writeStorage(STORAGE_KEYS.route, activeRoute);
+          currentPage = "home";
+          render();
+          showToast("Маршрут открыт.");
+        }
+        return;
+      }
+
+      const deleteSaved = event.target.closest("[data-delete-saved]");
+      if (deleteSaved) {
+        const routes = readStorage(STORAGE_KEYS.routes, []);
+        routes.splice(Number(deleteSaved.dataset.deleteSaved), 1);
+        writeStorage(STORAGE_KEYS.routes, routes);
+        render();
+        showToast("Маршрут удалён из сохранённых.");
+      }
+    });
+
+    document.addEventListener("change", function (event) {
+      if (event.target.matches("[data-daily]")) {
+        const completed = readStorage(STORAGE_KEYS.tasks, []);
+        const index = Number(event.target.dataset.daily);
+        const updated = event.target.checked
+          ? Array.from(new Set(completed.concat(index)))
+          : completed.filter(function (item) { return item !== index; });
+        writeStorage(STORAGE_KEYS.tasks, updated);
+      }
+
+      if (event.target.matches("[data-route-task]") && activeRoute) {
+        const index = Number(event.target.dataset.routeTask);
+        if (activeRoute.tasks[index]) {
+          activeRoute.tasks[index].done = event.target.checked;
+          writeStorage(STORAGE_KEYS.route, activeRoute);
+          render();
+        }
+      }
+    });
+
+    document.addEventListener("submit", function (event) {
+      if (event.target.id === "routeForm") {
+        event.preventDefault();
+        createRoute(document.getElementById("routeInput").value);
+      }
+
+      if (event.target.id === "budgetForm") {
+        event.preventDefault();
+        const income = Number(document.getElementById("income").value);
+        const expenses = Number(document.getElementById("expenses").value);
+        const currency = document.getElementById("currency").value;
+        const result = document.getElementById("budgetResult");
+
+        if (!Number.isFinite(income) || !Number.isFinite(expenses) || income < 0 || expenses < 0) {
+          showToast("Введи корректные суммы.");
+          return;
+        }
+
+        const balance = income - expenses;
+        const formatted = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(Math.abs(balance));
+        result.hidden = false;
+        result.textContent = balance >= 0
+          ? "После указанных расходов остаётся примерно " + formatted + " " + currency + "."
+          : "Расходы превышают указанный доход на " + formatted + " " + currency + ". Проверь цифры и обязательные платежи.";
+      }
+
+      if (event.target.id === "guideForm") {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const drafts = readStorage(STORAGE_KEYS.drafts, []);
+        drafts.unshift({
+          title: String(formData.get("title") || "").trim(),
+          category: String(formData.get("category") || "Другое"),
+          description: String(formData.get("description") || "").trim(),
+          createdAt: new Date().toISOString()
+        });
+        writeStorage(STORAGE_KEYS.drafts, drafts);
+        event.target.reset();
+        closeModal();
+        currentPage = "create";
+        render();
+        showToast("Черновик инструкции сохранён.");
+      }
+    });
+
+    async function shareRoute() {
+      if (!activeRoute) return;
+      const text = "Мой маршрут в ШАГ: " + activeRoute.title + ". " +
+        activeRoute.tasks.map(function (task, index) {
+          return (index + 1) + ". " + task.title;
+        }).join(" ");
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: "Мой маршрут в ШАГ", text: text });
+        } else if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          showToast("Текст маршрута скопирован.");
+        } else {
+          showToast("Поделиться можно, скопировав название маршрута: " + activeRoute.title);
+        }
+      } catch (error) {
+        if (error && error.name !== "AbortError") showToast("Не удалось открыть меню отправки.");
+      }
+    }
+
+    document.getElementById("menuToggle").addEventListener("click", function () {
+      sidebar.classList.toggle("open");
+    });
+
+    document.getElementById("modalBackdrop").addEventListener("click", function (event) {
+      if (event.target.id === "modalBackdrop") closeModal();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeModal();
+        sidebar.classList.remove("open");
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
